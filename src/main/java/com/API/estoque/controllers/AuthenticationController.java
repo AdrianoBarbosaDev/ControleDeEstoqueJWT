@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.API.estoque.infra.security.TokenService;
 import com.API.estoque.model.AuthenticationDTO;
+import com.API.estoque.model.LoginResponseDTO;
 import com.API.estoque.model.RegisterDTO;
 import com.API.estoque.model.Usuario;
 import com.API.estoque.repository.UsuarioRepository;
@@ -23,6 +25,9 @@ public class AuthenticationController {
 	private UsuarioRepository usuarioRepository;
 	
 	@Autowired
+	private TokenService tokenService;
+	
+	@Autowired
 	private AuthenticationManager authenticationManager;
 	
 	@PostMapping("/login")
@@ -30,7 +35,9 @@ public class AuthenticationController {
 		var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.senha());
 		var auth = this.authenticationManager.authenticate(usernamePassword);
 		
-		return ResponseEntity.ok().build();
+		var token = tokenService.generateToken((Usuario) auth.getPrincipal());
+		
+		return ResponseEntity.ok(new LoginResponseDTO(token));
 	}
 	
 	@PostMapping("/register")
